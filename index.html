@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+	<title>Small Quiz</title>
+
+	<style type="text/css">
+		*{
+			margin:0;
+			padding:0;
+			box-sizing: border-box;
+		}
+		body{
+			width:100%;
+			height:100%;
+		}
+		.grid{
+			width: 90%;
+		}
+		.box{
+			position: absolute;
+			width:66%;
+			height:100%;
+			left:20%;
+		}
+		.box h1{
+			color:#525559;
+			font-size: 1.1cm;
+			font-weight: 300;
+			letter-spacing: 1px;
+		}
+		#h2{
+			color:#999DA1;
+			font-size: 0.8cm;
+			margin-top: 2%;
+			font-weight: 300;
+			letter-spacing: 1px;
+		}
+		h4{
+			color:#999DA1;
+			font-size: 1.5cm;
+			margin-top: 2%;
+			font-weight: 300;
+			letter-spacing: 1px;
+			margin-top: 8%;
+		}
+		h2{
+			margin-top: 9%;
+		}
+		.box p{
+			margin:0.7em 0;
+			color:#797E83;
+			font-size: 0.5cm;
+			font-weight: 100;
+			line-height: 1.5;
+		}
+		.box button{
+			cursor: pointer;
+			outline: 0;
+			text-align: center;
+			padding:10px 20px;
+			border:0;
+			border-radius: 0.4em;
+			color:#fff;
+			text-transform: uppercase;
+			font-size: 0.875em;
+			font-weight: 400;
+			transition: opacity 0.3s;
+			background-color: #52bab3;
+			width:auto;
+			display: inline-block;
+		}
+		.box button:hover{
+			opacity: .75;
+		}
+		#end{
+			font-size: 0.9cm;
+			font-weight: 300;
+			color: #D87093;
+			margin-top: 1%;
+		}
+		div{
+			position: absolute;
+			left:10%;
+			top:5%;
+   			color:#D87093;
+			font-size:20px;
+			font-weight:bold;
+		}
+		@media screen and (max-width: 700px){
+			.box button{
+				width:95%;
+			}
+			.box h1{
+				width:100%;
+				font-size: 1.0cm;
+			}
+			#end{
+				width:100%;
+				font-size: 0.7cm;
+				line-height: 28px;
+			}
+			h4{
+				margin-top: 10%;
+			}
+			h2{
+				margin-top: 12%;
+			}
+		}
+	</style>
+</head>
+<body>
+	<div class="grid">
+	<div class="box" id="box">
+		<h1>测测你对我了解多少</h1>
+		<h2 id="h2"></h2>
+		<h3 id="score"></h3>
+
+		<p id="choice0"></p>
+		<button id="btn0">SELECT ANSWER</button>
+		<p id="choice1"></p>
+		<button id="btn1">SELECT ANSWER</button>
+		<p id="choice2"></p>
+		<button id="btn2">SELECT ANSWER</button>
+		<p id="choice3"></p>
+		<button id="btn3">SELECT ANSWER</button>
+		<footer>
+            <p id="progress">Question x of y</p>
+            <p id="end">Take a shot chase the sun find the beautiful!</p>
+        </footer>
+	</div>
+	</div>
+	
+	<script type="text/javascript">
+		//构造函数Question
+		var questions=[
+		 new Question("我最喜欢的男明星?", [ "彭于晏", "李易峰", "陈奕迅", "I don't know" ], "李易峰"),
+		 new Question("我最佩服的女明星?", [ "刘亦菲", "刘涛", "杨幂", "I don't know" ], "刘亦菲"),
+		 new Question("不喜欢吃下列哪种食物?", [ "酸菜", "芹菜", "葱", "I don't know" ], "芹菜"),
+		 new Question("下列哪首歌是我相对最喜欢的?", [ "请跟我联络", "如果有来生", "这一路走来", "I don't know" ], "这一路走来"),
+		 new Question("我是怎样的人?", [ "脾气暴躁", "温柔文静", "活泼可爱", "天生丽质" ], "天生丽质"),
+		];
+		
+		//定义函数，加一些属性
+		function Question(text,choices,answer){
+			this.text=text;
+			this.choices=choices;
+			this.answer=answer;
+			// console.log(answer);
+		}
+		//创建一个函数实例，若回答正确
+		Question.prototype.isCorrectAnswer=function(choices){
+			 if(this.answer === choices){return true;}
+			 else{return false;}
+		}
+		//定义函数
+		function Quiz(questions){
+			this.score=0;
+			this.questions=questions;
+			this.currentQuestionIndex=0;
+		}
+		//返回当前问题的编号
+		Quiz.prototype.getCurrentQuestion=function(){
+			return(this.questions[this.currentQuestionIndex]);
+		}
+		//若当前问题答对了，分数加2，题号加1
+		Quiz.prototype.guess=function(answer){
+			if(this.getCurrentQuestion().isCorrectAnswer(answer)){
+				var i=2;
+				this.score=this.score+i;
+			}
+			this.currentQuestionIndex++;
+		};
+		Quiz.prototype.hasEnded=function(){
+			 return this.currentQuestionIndex >= this.questions.length;
+		}
+		
+		//定义QuizUI里的各个函数
+		var QuizUI={
+			displayNext:function(){
+				if(quiz.hasEnded()){
+					this.displayScore();
+					this.displaySpeak();
+				}
+				else{
+					this.displayQuestion();
+            		this.displayChoices();
+            		this.displayProgress();
+				}
+			},
+			
+			
+   			displayQuestion:function(){
+   				this.populateIdWithHTML("h2",quiz.getCurrentQuestion().text);
+   			},
+			displayChoices:function(){
+				var choices=quiz.getCurrentQuestion().choices;
+				for(var i=0;i<choices.length;i++){
+					this.populateIdWithHTML("choice" + i, choices[i]);
+					this.guessHandler("btn" + i, choices[i]);
+				}
+			},
+			displayScore:function(){
+        		var gameOverHTML = "<h4>Game Over</h4>";
+       		 	gameOverHTML += "<h2> Your score is: " + quiz.score + "</h2>";
+        		this.populateIdWithHTML("box", gameOverHTML);
+        		
+        		},
+   			displaySpeak:function(){
+   			 	if(quiz.score==0){
+   					var aa=document.createElement("div");
+   					
+   					aa.innerText="啊哦，你一点也不了解我呀 —_—";
+   					document.gameOverHTML.appendChild(aa);
+   				 }
+   				 if(quiz.score>0&&quiz.score<=8){
+   					var aa=document.createElement("div");
+   					
+   					aa.innerText="加油，还差一点你就非常了解我了！";
+   					document.body.appendChild(aa);
+   				 }
+   				 if(quiz.score==10){
+   					var aa=document.createElement("div");
+   					
+   					aa.innerText="哇塞，你这么了解我，可以呀朋友！";
+   					document.body.appendChild(aa);
+   				 }
+   			  },
+			populateIdWithHTML: function(id, text) {
+        		var element = document.getElementById(id);
+        		element.innerHTML = text;
+    		},
+    		guessHandler:function(id,btn){
+    			var button = document.getElementById(id);
+        		button.onclick = function() {
+            	quiz.guess(btn);
+            	QuizUI.displayNext();
+       		 	}
+    		},
+			displayProgress:function(){
+				var currentQuestionNumber = quiz.currentQuestionIndex + 1;
+        		this.populateIdWithHTML("progress", "Question " + currentQuestionNumber + " of " + quiz.questions.length);
+			}
+		};
+		//构造Quiz函数
+		var quiz = new Quiz(questions);
+		//调用displayNext（）函数，显示页面信息
+		QuizUI.displayNext();
+	</script>
+</body>
+</html>
